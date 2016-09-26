@@ -10,9 +10,24 @@
 </head>
 <body>
   <script src="js/javascript.js"></script>
+  <script src="js/knockout.js"></script>
+
+  <ul data-bind="foreach: stopList">
+    <li data-bind="text: stop_num"></li>
+  </ul>
+  <div data-bind="with:currentStop">
+  <p data-bind="text:stop_num"></p>
+  <p data-bind="text:stop_name"></p>
+  <p data-bind="text:stop_lat"></p>
+  <p data-bind="text:stop_lon"></p>
+  </div>
+
   <div id="map"></div>
   <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAiT9mwBZV1ApXGKcsim-kP_nCMeU5XG8&v=3&callback=initMap">
   </script>
+
+
+
 </body>
 </html>
