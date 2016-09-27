@@ -5,7 +5,7 @@ var map;
 var markers = [];
 
 function initMap() {
-  // Constructor creates a new map - only center and zoom are required.
+  // Constructor creates a new map
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 45.4215, lng: -75.6972},
     zoom: 16
@@ -23,18 +23,24 @@ function initMap() {
     infoWindow.open(map, marker);
   }); */
 
-
+//Array of locations listed on the map
 var locations = [
-  {title: 'Bank / Slater', description: 'Route 1 (Ottawa-Rockcliffe) <br> Route 2 (Downtown) <br> Route 7 (St-Laurent)', location: {lat: 45.419109, lng: -75.699486}},
-  {title: 'Slater / Kent', description: 'Route 97: (Airport)', location: {lat: 45.4179, lng: -75.70282}},
-  {title: 'Wellington / Metacalfe (Parliament)', description:  'Route 1 (Ottawa-Rockcliffe) <br> Route 2 (Downtown) <br> Route 7 (St-Laurent)', location: {lat: 45.423405, lng: -75.698051}},
-  {title: 'Queen / Bank', description: 'Route 4 (Rideau) <br> Route 9 (Hurdman) <br> Route 12 (Blair)', location: {lat:45.420593, lng: -75.700485}},
-  {title: 'Queen / Metcalfe', description: 'Route 4 (Rideau) <br> Route 9 (Hurdman) <br> Route 12 (Blair)', location: {lat:45.421982, lng:-75.697273}}
+  {title: 'Parliament of Canada', description: '<a href="http://www.parl.gc.ca/" target="_blank">http://www.parl.gc.ca/</a>', location: {lat: 45.423594, lng: -75.700929}},
+  {title: 'National Arts Centre', description: '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>', location: {lat: 45.423263, lng: -75.693275}},
+  {title: 'Byward Market', description:  '<a href="http://www.byward-market.com/" target="_blank">http://www.byward-market.com/</a>', location: {lat: 45.428866, lng: -75.691159}},
+  {title: 'Canadian Aviation and Space Museum', description: '<a href="http://www.casmuseum.techno-science.ca/" target="_blank">http://www.casmuseum.techno-science.ca/</a>', location: {lat:45.421530, lng: -75.697193}},
+  {title: 'Rideau Centre', description: '<a href="https://www.cfshops.com/rideau-centre.html" target="_blank">https://www.cfshops.com/rideau-centre.html</a>', location: {lat:45.425098, lng:-75.691250}}
 ];
 
 var largeInfowindow = new google.maps.InfoWindow();
 var bounds = new google.maps.LatLngBounds();
 
+//Change initial marker's colour
+var defaultIcon = makeMarkerIcon('0091ff');
+//Change clicked marker's colour
+var highlightedIcon = makeMarkerIcon('FFFF24');
+
+var largeInfowindow = new google.maps.InfoWindow();
 //The following group uses the location array to create an array of markers on intialize.
 for (var i = 0; i < locations.length; i++) {
   var position = locations[i].location;
@@ -46,19 +52,26 @@ for (var i = 0; i < locations.length; i++) {
     title: title,
     description: description,
     animation: google.maps.Animation.DROP,
-    id: i
+    icon: defaultIcon,
+    id: i,
   });
 
   markers.push(marker);
-
   marker.addListener('click', function(){
     populateInfoWindow(this, largeInfowindow);
+  });
+  marker.addListener('click', function(){ //changes marker's colour when clicked
+    this.setIcon(highlightedIcon);
+  });
+  marker.addListener('mouseout', function(){ //cahnges marker's colour to default once the mouse isn't on the marker
+    this.setIcon(defaultIcon);
   });
   bounds.extend(markers[i].position);
 }
 map.fitBounds(bounds);
 }
 
+//Adds info to the info Window for locations
 function populateInfoWindow(marker, infowindow) {
         // Check to make sure the infowindow is not already opened on this marker.
         if (infowindow.marker != marker) {
@@ -72,46 +85,31 @@ function populateInfoWindow(marker, infowindow) {
         }
       }
 
-var initialStops = [
-  {
-    stopNum: '7688',
-    stopName: 'Bank / Slater',
-    stopLat: '45.419109',
-    stopLon: '-75.699486'
-  },
-  {
-    stopNum: '3006',
-    stopName: 'Slater / Kent',
-    stopLat: '45.4179',
-    stopLon: '-75.70282'
-  },
-  {
-    stopNum: '7694',
-    stopName: 'Wellington / Metacalfe (Parliament)',
-    stopLat: '45.423405',
-    stopLon: '-75.698051'
-  },
-  {
-    stopNum: '7561',
-    stopName: 'Queen / Bank',
-    stopLat: '45.420593',
-    stopLon: '-75.700485'
-  },
-  {
-    stopNum: '1512',
-    stopName: 'Queen / Metcalfe',
-    stopLat: '45.421982',
-    stopLon: '-75.697273'
-  }
-];
+    //Get the marker and changes colour
+    function makeMarkerIcon(markerColor) {
+        var markerImage = new google.maps.MarkerImage(
+          'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+          '|40|_|%E2%80%A2',
+          new google.maps.Size(21,34),
+          new google.maps.Point(0,0),
+          new google.maps.Point(10, 34),
+          new google.maps.Size(21,34));
+          return markerImage;
 
-var Stop = function(data){
+      }
+
+function AppViewModel(){
+  this.stopNum = ko.observable("9089");
+  this.stopName = ko.observable("queen");
+}
+
+/* var Stop = function(data){
   this.stopNum = ko.observable(data.stopNum);
   this.stopName = ko.observable(data.stopName);
   this.stopLat = ko.observable(data.stopLat);
   this.stopLon = ko.observable(data.stopLon);
 };
-/* VIEW MODEL */
+/* VIEW MODEL
 
 // Make stops show up in a list in HTML
 var ViewModel = function() {
@@ -125,6 +123,6 @@ var ViewModel = function() {
 
   this.currentStop = ko.observable(this.stopList()[0]);
 
-  };
+}; */
 
-ko.applyBindings(new ViewModel());
+ko.applyBindings(new AppViewModel());
