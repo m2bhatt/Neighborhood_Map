@@ -25,11 +25,11 @@ function initMap() {
 
 
 var locations = [
-  {title: 'Bank / Slater', location: {lat: 45.419109, lng: -75.699486}},
-  {title: 'Slater / Kent', location: {lat: 45.4179, lng: -75.70282}},
-  {title: 'Wellington / Metacalfe (Parliament)', location: {lat: 45.423405, lng: -75.698051}},
-  {title: 'Queen / Bank', location: {lat:45.420593, lng: -75.700485}},
-  {title: 'Queen / Metcalfe', location: {lat:45.421982, lng:-75.697273}}
+  {title: 'Bank / Slater', description: 'Route 1 (Ottawa-Rockcliffe) <br> Route 2 (Downtown) <br> Route 7 (St-Laurent)', location: {lat: 45.419109, lng: -75.699486}},
+  {title: 'Slater / Kent', description: 'Route 97: (Airport)', location: {lat: 45.4179, lng: -75.70282}},
+  {title: 'Wellington / Metacalfe (Parliament)', description:  'Route 1 (Ottawa-Rockcliffe) <br> Route 2 (Downtown) <br> Route 7 (St-Laurent)', location: {lat: 45.423405, lng: -75.698051}},
+  {title: 'Queen / Bank', description: 'Route 4 (Rideau) <br> Route 9 (Hurdman) <br> Route 12 (Blair)', location: {lat:45.420593, lng: -75.700485}},
+  {title: 'Queen / Metcalfe', description: 'Route 4 (Rideau) <br> Route 9 (Hurdman) <br> Route 12 (Blair)', location: {lat:45.421982, lng:-75.697273}}
 ];
 
 var largeInfowindow = new google.maps.InfoWindow();
@@ -39,10 +39,12 @@ var bounds = new google.maps.LatLngBounds();
 for (var i = 0; i < locations.length; i++) {
   var position = locations[i].location;
   var title = locations[i].title;
+  var description = locations[i].description;
   var marker = new google.maps.Marker({
     map: map,
     position: position,
     title: title,
+    description: description,
     animation: google.maps.Animation.DROP,
     id: i
   });
@@ -61,7 +63,7 @@ function populateInfoWindow(marker, infowindow) {
         // Check to make sure the infowindow is not already opened on this marker.
         if (infowindow.marker != marker) {
           infowindow.marker = marker;
-          infowindow.setContent('<div>' + marker.title + '</div>');
+          infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.description + '</div>');
           infowindow.open(map, marker);
           // Make sure the marker property is cleared if the infowindow is closed.
           infowindow.addListener('closeclick',function(){
