@@ -9,10 +9,11 @@
     <title>Neighborhood Map: Ottawa</title>
 </head>
 <body>
-  <script src="js/javascript.js"></script>
+  <script src="js/jquery-3.1.1.min.js"></script>
   <script src="js/knockout.js"></script>
+  <script src="js/javascript.js"></script>
 
-  <ul data-bind="foreach: stopList">
+<!--  <ul data-bind="foreach: stopList">
     <li data-bind="text: stop_num"></li>
   </ul>
   <div data-bind="with:currentStop">
@@ -20,7 +21,22 @@
   <p data-bind="text:stop_name"></p>
   <p data-bind="text:stop_lat"></p>
   <p data-bind="text:stop_lon"></p>
-  </div>
+</div> -->
+
+<!--  <table>
+    <thead><tr>
+        <th>Stop Number</th><th>Stop Name</th><th>Stop Lat</th><th>Stop Lon</th>
+    </tr></thead>
+    <!-- Todo: Generate table body
+    <tbody data-bind="with:Stop">
+        <tr>
+            <td data-bind="text: stopNum"></td>
+            <td data-bind="text: stopName"></td>
+            <td data-bind="text: stopLat"></td>
+            <td data-bind="text: stopLon"></td>
+         </tr>
+     </tbody>
+</table> -->
 
   <div id="map"></div>
   <script async defer
