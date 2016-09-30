@@ -19,23 +19,6 @@ class PointOfInterest {
   }
 }
 
-class PointOfInterestsViewModel {
-  pointOfInterests() {
-    return ko.observableArray([
-      new PointOfInterest(
-        'Parliament of Canada',
-        '<a href="http://www.parl.gc.ca/" target="_blank">http://www.parl.gc.ca/</a>',
-        new Location(45.423594, -75.700929)
-      ),
-      new PointOfInterest(
-        'National Arts Centre',
-        '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>',
-        new Location(45.423263, -75.693275)
-      )
-    ]);
-  }
-}
-
 class NeighborhoodMarker {
   constructor(map, pointOfInterest){
     this.pointOfInterest = pointOfInterest;
@@ -91,44 +74,58 @@ class NeighborhoodMarker {
 }
 
 class NeighborhoodMap {
-  constructor() {
+  constructor(pointsOfInterest) {
+    this.pointsOfInterest = pointsOfInterest;
+    this.pointsOfInterest.subscribe(this.onChange, this, "arrayChange");
+
     this._map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: 45.4215, lng: -75.6972},
       zoom: 16
     });
   }
 
-  renderPointOfInterests(pointOfInterests) {
-    for (var i = 0; i < pointOfInterests.length; i++) {
-      this.renderPointOfInterest(pointOfInterests[i]);
+  onChange(events) {
+    var pointsOfInterest = events.map(function(event) { return event.value });
+    this.renderPointsOfInterest(pointsOfInterest);
+  }
+
+  renderPointsOfInterest(pointsOfInterest) {
+    for (var pointOfInterest of pointsOfInterest) {
+      this.renderPointOfInterest(pointOfInterest)
     }
   }
 
   renderPointOfInterest(pointOfInterest) {
-    new NeighborhoodMarker(this._map, pointOfInterest)
+    console.log(pointOfInterest);
+    new NeighborhoodMarker(this._map, pointOfInterest);
   }
 }
 
 class Application {
   constructor() {
-    this.pointsOfInterest = [
-      new PointOfInterest(
-        'Parliament of Canada',
-        '<a href="http://www.parl.gc.ca/" target="_blank">http://www.parl.gc.ca/</a>',
-        new Location(45.423594, -75.700929)
-      ),
-      new PointOfInterest(
-        'National Arts Centre',
-        '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>',
-        new Location(45.423263, -75.693275)
-      )
-    ]
+    this.pointsOfInterest = ko.observableArray([]);
+    this.map = null;
   }
 
-  render() {
-    var map = new NeighborhoodMap();
-    map.renderPointOfInterests(this.pointsOfInterest);
+  initialize() {
+    this.map = new NeighborhoodMap(this.pointsOfInterest);
     ko.applyBindings(this);
+
+    this.addPointOfInterest(new PointOfInterest(
+      'Parliament of Canada',
+      '<a href="http://www.parl.gc.ca/" target="_blank">http://www.parl.gc.ca/</a>',
+      new Location(45.423594, -75.700929)
+    ));
+
+    this.addPointOfInterest(new PointOfInterest(
+      'National Arts Centre',
+      '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>',
+      new Location(45.423263, -75.693275)
+    ));
+  }
+
+  addPointOfInterest(pointOfInterest) {
+    this.pointsOfInterest.push(pointOfInterest);
   }
 }
 
