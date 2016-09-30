@@ -4,83 +4,124 @@ var map;
 var markers = [];
 //Array of locations listed on the map
 
-
-function initMap() {
-  // Constructor creates a new map
-  map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: 45.4215, lng: -75.6972},
-    zoom: 16
-  });
-
-var locations = [
-    {title: 'Parliament of Canada', description: '<a href="http://www.parl.gc.ca/" target="_blank">http://www.parl.gc.ca/</a>', location: {lat: 45.423594, lng: -75.700929}},
-    {title: 'National Arts Centre', description: '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>', location: {lat: 45.423263, lng: -75.693275}},
-    {title: 'Byward Market', description:  '<a href="http://www.byward-market.com/" target="_blank">http://www.byward-market.com/</a>', location: {lat: 45.428866, lng: -75.691159}},
-    {title: 'Canadian Aviation and Space Museum', description: '<a href="http://www.casmuseum.techno-science.ca/" target="_blank">http://www.casmuseum.techno-science.ca/</a>', location: {lat:45.421530, lng: -75.697193}},
-    {title: 'Rideau Centre', description: '<a href="https://www.cfshops.com/rideau-centre.html" target="_blank">https://www.cfshops.com/rideau-centre.html</a>', location: {lat:45.425098, lng:-75.691250}}
-  ];
-
-var largeInfowindow = new google.maps.InfoWindow();
-var bounds = new google.maps.LatLngBounds();
-
-//Change initial marker's colour
-var defaultIcon = makeMarkerIcon('0091ff');
-//Change clicked marker's colour
-var highlightedIcon = makeMarkerIcon('FFFF24');
-
-//The following group uses the location array to create an array of markers on intialize.
-for (var i = 0; i < locations.length; i++) {
-  var position = locations[i].location;
-  var title = locations[i].title;
-  var description = locations[i].description;
-
-  var marker = new google.maps.Marker({
-    map: map,
-    position: position,
-    title: title,
-    description: description,
-    animation: google.maps.Animation.DROP,
-    icon: defaultIcon,
-    id: i,
-  });
-
-  markers.push(marker);
-  marker.addListener('click', function(){
-    populateInfoWindow(this, largeInfowindow);
-  });
-  marker.addListener('click', function(){ //changes marker's colour when clicked
-    this.setIcon(highlightedIcon);
-  });
-  marker.addListener('mouseout', function(){ //cahnges marker's colour to default once the mouse isn't on the marker
-    this.setIcon(defaultIcon);
-  });
-  bounds.extend(markers[i].position);
-  map.fitBounds(bounds);
+class Location {
+  constructor(lat, lng) {
+    this.lat = lat;
+    this.lng = lng;
+  }
 }
 
-//Adds info to the info Window for locations
-function populateInfoWindow(marker, infowindow) {
-  // Check to make sure the infowindow is not already opened on this marker.
-    if (infowindow.marker != marker) {
-    infowindow.marker = marker;
-    infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.description + '</div>');
-    infowindow.open(map, marker);
-    // Make sure the marker property is cleared if the infowindow is closed.
-    infowindow.addListener('closeclick',function(){
+class PointOfInterest {
+  constructor(title, description, location) {
+    this.title = title;
+    this.description = description;
+    this.location = location;
+  }
+}
+
+class PointOfInterestsViewModel {
+  pointOfInterests() {
+    return ko.observableArray([
+      new PointOfInterest(
+        'Parliament of Canada',
+        '<a href="http://www.parl.gc.ca/" target="_blank">http://www.parl.gc.ca/</a>',
+        new Location(45.423594, -75.700929)
+      ),
+      new PointOfInterest(
+        'National Arts Centre',
+        '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>',
+        new Location(45.423263, -75.693275)
+      )
+    ]);
+  }
+}
+
+class NeighborhoodMap {
+  constructor() {
+    this._map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: 45.4215, lng: -75.6972},
+      zoom: 16
     });
+
+    this._defaultIcon = this._makeMarkerIcon('0091ff');
+    this._highlightedIcon = this._makeMarkerIcon('FFFF24');
   }
+
+  renderPointOfInterests(pointOfInterests) {
+    for (var i = 0; i < pointOfInterests.length; i++) {
+      this.renderPointOfInterest(pointOfInterests[i]);
+    }
+  }
+
+  renderPointOfInterest(pointOfInterest) {
+    console.log(pointOfInterest);
+
+    var marker = new google.maps.Marker({
+      map: this._map,
+      position: pointOfInterest.location,
+      title: pointOfInterest.title,
+      description: pointOfInterest.description,
+      animation: google.maps.Animation.DROP,
+      icon: this._defaultIcon
+    });
+
+    var self = this;
+
+    markers.push(marker);
+    marker.addListener('click', function(){
+      console.log(this);
+      self._populateInfoWindow(this);
+    });
+    marker.addListener('click', function(){ //changes marker's colour when clicked
+      console.log(this);
+      this.setIcon(self._highlightedIcon);
+    });
+    marker.addListener('mouseout', function(){ //cahnges marker's colour to default once the mouse isn't on the marker
+      console.log(this);
+      this.setIcon(self._defaultIcon);
+    });
+    // bounds.extend(markers[i].position);
+    // map.fitBounds(bounds);
+  }
+
+  _populateInfoWindow(marker) {
+    var infowindow = new google.maps.InfoWindow();
+    // Check to make sure the infowindow is not already opened on this marker.
+    if (infowindow.marker != marker) {
+      infowindow.marker = marker;
+      infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.description + '</div>');
+      infowindow.open(map, marker);
+      // Make sure the marker property is cleared if the infowindow is closed.
+      infowindow.addListener('closeclick',function(){
+      });
+    }
+  }
+
+  _makeMarkerIcon(markerColor) {
+      var markerImage = new google.maps.MarkerImage(
+        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+        '|40|_|%E2%80%A2',
+        new google.maps.Size(21,34),
+        new google.maps.Point(0,0),
+        new google.maps.Point(10, 34),
+        new google.maps.Size(21,34));
+        return markerImage;
+
+    }
 }
 
-//Get the marker and changes colour
-function makeMarkerIcon(markerColor) {
-    var markerImage = new google.maps.MarkerImage(
-      'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
-      '|40|_|%E2%80%A2',
-      new google.maps.Size(21,34),
-      new google.maps.Point(0,0),
-      new google.maps.Point(10, 34),
-      new google.maps.Size(21,34));
-      return markerImage;
-
-  }
-};
+function Run() {
+  var map = new NeighborhoodMap();
+  map.renderPointOfInterests([
+    new PointOfInterest(
+      'Parliament of Canada',
+      '<a href="http://www.parl.gc.ca/" target="_blank">http://www.parl.gc.ca/</a>',
+      new Location(45.423594, -75.700929)
+    ),
+    new PointOfInterest(
+      'National Arts Centre',
+      '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>',
+      new Location(45.423263, -75.693275)
+    )
+  ]);
+}
