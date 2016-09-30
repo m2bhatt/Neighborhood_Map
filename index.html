@@ -9,23 +9,22 @@
     <title>Neighborhood Map: Ottawa</title>
 </head>
 <body>
-
-  <div>
-    <h2 data-bind="text: title"></h2>
-    <div data-bind="text: description"></div>
+  <div id="list">
+    <ul data-bind="foreach: pointsOfInterest">
+      <li>
+        <h2 data-bind="text: title"></h2>
+        <p data-bind="html: description"></p>
+      </li>
+    </ul>
   </div>
 
-
-
+  <div id="map"></div>
 
   <script src="js/jquery-3.1.1.min.js"></script>
   <script src="js/knockout.js"></script>
   <script src="js/javascript.js"></script>
-
-  <div id="map">
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAiT9mwBZV1ApXGKcsim-kP_nCMeU5XG8&v=3&callback=Run">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAiT9mwBZV1ApXGKcsim-kP_nCMeU5XG8&v=3&callback=app.render">
   </script>
-  </div>
 </body>
 </html>
