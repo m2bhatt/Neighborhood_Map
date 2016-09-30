@@ -36,15 +36,66 @@ class PointOfInterestsViewModel {
   }
 }
 
+class NeighborhoodMarker {
+  constructor(map, pointOfInterest){
+    this.pointOfInterest = pointOfInterest;
+    this.defaultIcon = this._makeMarkerIcon('0091ff');
+    this.highlightedIcon = this._makeMarkerIcon('FFFF24');
+    this._map = map;
+    this._marker = this._makeMarker();
+  }
+
+  onClick() {
+    this._marker.setIcon(this.highlightedIcon);
+    this._populateInfoWindow();
+  }
+
+  onMouseOut() {
+    this._marker.setIcon(this.defaultIcon);
+  }
+
+  _makeMarker() {
+    var marker = new google.maps.Marker({
+      map: this._map,
+      position: this.pointOfInterest.location,
+      animation: google.maps.Animation.DROP,
+      icon: this.defaultIcon
+    });
+
+    marker.addListener('click', this.onClick.bind(this));
+    marker.addListener('mouseout', this.onMouseOut.bind(this));
+
+    return marker;
+  }
+
+  _makeMarkerIcon(markerColor) {
+    var markerImage = new google.maps.MarkerImage(
+      'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+      '|40|_|%E2%80%A2',
+      new google.maps.Size(21,34),
+      new google.maps.Point(0,0),
+      new google.maps.Point(10, 34),
+      new google.maps.Size(21,34)
+    );
+
+    return markerImage;
+  }
+
+  _populateInfoWindow(marker) {
+    var infoWindow = new google.maps.InfoWindow();
+    // Check to make sure the infowindow is not already opened on this marker.
+    infoWindow.marker = this._marker;
+    infoWindow.setContent('<div>' + this.pointOfInterest.title + '</div>' + '<div>' + this.pointOfInterest.description + '</div>');
+    infoWindow.open(this._map, this._marker);
+  }
+}
+
 class NeighborhoodMap {
   constructor() {
     this._map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: 45.4215, lng: -75.6972},
       zoom: 16
     });
-
-    this._defaultIcon = this._makeMarkerIcon('0091ff');
-    this._highlightedIcon = this._makeMarkerIcon('FFFF24');
   }
 
   renderPointOfInterests(pointOfInterests) {
@@ -54,60 +105,8 @@ class NeighborhoodMap {
   }
 
   renderPointOfInterest(pointOfInterest) {
-    console.log(pointOfInterest);
-
-    var marker = new google.maps.Marker({
-      map: this._map,
-      position: pointOfInterest.location,
-      title: pointOfInterest.title,
-      description: pointOfInterest.description,
-      animation: google.maps.Animation.DROP,
-      icon: this._defaultIcon
-    });
-
-    var self = this;
-
-    markers.push(marker);
-    marker.addListener('click', function(){
-      console.log(this);
-      self._populateInfoWindow(this);
-    });
-    marker.addListener('click', function(){ //changes marker's colour when clicked
-      console.log(this);
-      this.setIcon(self._highlightedIcon);
-    });
-    marker.addListener('mouseout', function(){ //cahnges marker's colour to default once the mouse isn't on the marker
-      console.log(this);
-      this.setIcon(self._defaultIcon);
-    });
-    // bounds.extend(markers[i].position);
-    // map.fitBounds(bounds);
+    new NeighborhoodMarker(this._map, pointOfInterest)
   }
-
-  _populateInfoWindow(marker) {
-    var infowindow = new google.maps.InfoWindow();
-    // Check to make sure the infowindow is not already opened on this marker.
-    if (infowindow.marker != marker) {
-      infowindow.marker = marker;
-      infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.description + '</div>');
-      infowindow.open(map, marker);
-      // Make sure the marker property is cleared if the infowindow is closed.
-      infowindow.addListener('closeclick',function(){
-      });
-    }
-  }
-
-  _makeMarkerIcon(markerColor) {
-      var markerImage = new google.maps.MarkerImage(
-        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
-        '|40|_|%E2%80%A2',
-        new google.maps.Size(21,34),
-        new google.maps.Point(0,0),
-        new google.maps.Point(10, 34),
-        new google.maps.Size(21,34));
-        return markerImage;
-
-    }
 }
 
 function Run() {
