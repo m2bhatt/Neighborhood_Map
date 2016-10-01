@@ -79,7 +79,7 @@ class NeighborhoodMap {
     this.pointsOfInterest.subscribe(this.onChange, this, "arrayChange");
 
     this._map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: 45.4215, lng: -75.6972},
+      center: {lat: 45.4256, lng: -75.6953},
       zoom: 16
     });
   }
@@ -122,6 +122,25 @@ class Application {
       '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>',
       new Location(45.423263, -75.693275)
     ));
+
+    this.addPointOfInterest(new PointOfInterest(
+      'Byward Market',
+      '<a href="http://www.byward-market.com/" target="_blank">http://www.byward-market.com/</a>',
+      new Location(45.428866, -75.691159)
+    ));
+
+    this.addPointOfInterest(new PointOfInterest(
+      'Canadian Aviation and Space Museum',
+      '<a href="http://www.casmuseum.techno-science.ca/" target="_blank"> http://www.casmuseum.techno-science.ca/</a>',
+      new Location(45.421530, -75.697193)
+    ));
+
+    this.addPointOfInterest(new PointOfInterest(
+      'Rideau Centre',
+      '<a href="https://www.cfshops.com/rideau-centre.html" target="_blank">https://www.cfshops.com/rideau-centre.html</a>',
+      new Location(45.425098, -75.691250)
+    ));
+
   }
 
   addPointOfInterest(pointOfInterest) {
