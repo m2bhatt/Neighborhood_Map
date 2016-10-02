@@ -4,9 +4,9 @@ html, body { font-family: Arial, sans-serif; height: 100%; margin:0; padding: 0;
 #list {
   position: absolute;
   width: 30ex;
-  height: 20em;
+  height: 30em;
   z-index: 1;
-  background: white;
+  background: #9AE9A5;
   top: 54px;
   left: 12px;
 }

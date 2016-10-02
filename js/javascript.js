@@ -1,16 +1,16 @@
-/* Main js file for the Neighborhood Map.
-Gets the Google Map */
+// Main js file for the Neighborhood Map.
 var map;
 var markers = [];
 //Array of locations listed on the map
 
+//Defines the Location class with latitude and longitude.
 class Location {
   constructor(lat, lng) {
     this.lat = lat;
     this.lng = lng;
   }
 }
-
+//Defines the PointOfInterest class with title, description, and location.
 class PointOfInterest {
   constructor(title, description, location) {
     this.title = title;
@@ -18,7 +18,7 @@ class PointOfInterest {
     this.location = location;
   }
 }
-
+//Defines the NeighborhoodMarker class with map and pointOfInterest
 class NeighborhoodMarker {
   constructor(map, pointOfInterest){
     this.pointOfInterest = pointOfInterest;
@@ -101,6 +101,34 @@ class NeighborhoodMap {
   }
 }
 
+  var articles = [];
+  function loadData() {
+    var $wikiElem = $('#wikipedia-links');
+    $wikiElem.text("");
+    for (i = 0; i < pointsOfInterest.length; i++) {
+      title = this.pointsOfInterest[i].title;
+      var wikiURL = 'https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(title) + '&callback=wikiCallback';
+      var wikiRequestTimeout = setTimeout(function() { //error handling with jsonp
+        console.log("failed to get wikipedia resources");
+      }, 8000);
+      $.ajax({
+        url: wikiURL,
+        dataType: "jsonp",
+        // jsonp: "callback",
+        success: function(response) {
+          var firstSummary = response[2][0];
+          //var wikiLink = response[3][0];
+          articles.push(firstSummary) // + '<br><a href="' + wikiLink + '">' + wikiLink + '</a>';
+          clearTimeout(wikiRequestTimeout);
+        }
+      });
+    }
+    console.log(articles)
+    return false;
+  };
+  $('#form-container').ready(loadData);
+
+
 class Application {
   constructor() {
     this.pointsOfInterest = ko.observableArray([]);
@@ -113,31 +141,31 @@ class Application {
 
     this.addPointOfInterest(new PointOfInterest(
       'Parliament of Canada',
-      '<a href="http://www.parl.gc.ca/" target="_blank">http://www.parl.gc.ca/</a>',
+      '<a href="http://www.parl.gc.ca/" target="_blank"> www.parl.gc.ca</a>',
       new Location(45.423594, -75.700929)
     ));
 
     this.addPointOfInterest(new PointOfInterest(
       'National Arts Centre',
-      '<a href="http://nac-cna.ca/en/" target="_blank">http://nac-cna.ca/en/</a>',
+      '<a href="http://nac-cna.ca/en/" target="_blank"> nac-cna.ca </a>',
       new Location(45.423263, -75.693275)
     ));
 
     this.addPointOfInterest(new PointOfInterest(
       'Byward Market',
-      '<a href="http://www.byward-market.com/" target="_blank">http://www.byward-market.com/</a>',
+      '<a href="http://www.byward-market.com/" target="_blank"> www.byward-market.com </a>',
       new Location(45.428866, -75.691159)
     ));
 
     this.addPointOfInterest(new PointOfInterest(
       'Canadian Aviation and Space Museum',
-      '<a href="http://www.casmuseum.techno-science.ca/" target="_blank"> http://www.casmuseum.techno-science.ca/</a>',
+      '<a href="http://www.casmuseum.techno-science.ca/" target="_blank"> www.casmuseum.techno-science.ca </a>',
       new Location(45.421530, -75.697193)
     ));
 
     this.addPointOfInterest(new PointOfInterest(
       'Rideau Centre',
-      '<a href="https://www.cfshops.com/rideau-centre.html" target="_blank">https://www.cfshops.com/rideau-centre.html</a>',
+      '<a href="https://www.cfshops.com/rideau-centre.html" target="_blank"> www.cfshops.com/rideau-centre.html</a>',
       new Location(45.425098, -75.691250)
     ));
 
@@ -149,3 +177,5 @@ class Application {
 }
 
 var app = new Application();
+
+console.log(this.pointsOfInterest);

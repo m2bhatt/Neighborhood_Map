@@ -12,8 +12,10 @@
   <div id="list">
     <ul data-bind="foreach: pointsOfInterest">
       <li>
-        <h2 data-bind="text: title"></h2>
+        <h4 data-bind="text: title"></h4>
         <p data-bind="html: description"></p>
+        <p id="wikipedia-links"> Article </p>  
+
       </li>
     </ul>
   </div>
