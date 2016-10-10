@@ -9,20 +9,22 @@
     <title>Neighborhood Map: Ottawa</title>
 </head>
 <body>
+  <div class="toggleList"><img src="https://openclipart.org/image/2400px/svg_to_png/221605/menu-icon.png" /></div>
   <div id="list">
-    <ul data-bind="foreach: pointsOfInterest">
-      <li>
+    <input id="filterInput" placeholder="Search" data-bind="textInput: currentFilter, valueUpdate: 'keyup', event:{ keyup: applyFilter}" autocomplete="off" />
+    <ul data-bind="foreach: filterPOIs">
+      <li data-bind="attr: {id: id}, click: $parent.onPOIListClick">
         <h4 data-bind="text: title"></h4>
         <p data-bind="html: description"></p>
-        <p id="wikipedia-links"> Article </p>  
-
+        <p class="wikipedia-summary"></p>
+        <p class="wikipedia-link"></p>
       </li>
     </ul>
   </div>
 
   <div id="map"></div>
 
-  <script src="js/jquery-3.1.1.min.js"></script>
+  <script src="js/jquery-3.1.1.js"></script>
   <script src="js/knockout.js"></script>
   <script src="js/javascript.js"></script>
   <script async defer

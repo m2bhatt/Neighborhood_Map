@@ -4,15 +4,47 @@ html, body { font-family: Arial, sans-serif; height: 100%; margin:0; padding: 0;
 #list {
   position: absolute;
   width: 30ex;
-  height: 30em;
+  height: 75%;
+  overflow-y:auto;
+  overflow-x:hidden;
   z-index: 1;
   background: #9AE9A5;
   top: 54px;
   left: 12px;
 }
+#list input{
+  width:100%;
+  margin-left:-1px;
+  margin-top:10px;
+  height:25px;
+  padding:5px;
+}
 
 #map {
   height: 100%;
 }
+
+.toggleList{
+  position:fixed;
+  height:35px;
+  width:35px;
+  left:150px;
+  top:7px;
+  z-index:1000;
+  background:grey;
+  border:1px solid black;
+  border-radius:5px;
+}
+.toggleList img{
+  width: 25px;
+  height: 25px;
+  padding-left: 5px;
+  padding-top: 5px;
+}
+
+.hideList {
+  display:none;
+}
+
 
 @media only screen and (max-width:480px){body{font-size:12px;}
