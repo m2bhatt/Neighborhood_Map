@@ -4,35 +4,35 @@ var map;
 var POIlist = [
   {
     title: 'Parliament of Canada',
-    description: '<a href="http://www.parl.gc.ca/" target="_blank">www.parl.gc.ca</a>',
+    description: '<a target="_BLANK" href="http://www.parl.gc.ca/" target="_blank">www.parl.gc.ca</a>',
     id: "poi0",
     lat: 45.423594, 
     lng: -75.700929
   },
   {
     title: 'National Arts Centre',
-    description: '<a href="http://nac-cna.ca/en/" target="_blank">nac-cna.ca</a>',
+    description: '<a target="_BLANK" href="http://nac-cna.ca/en/" target="_blank">nac-cna.ca</a>',
     id: "poi1",
     lat: 45.423263,
     lng: -75.693275 
   },
   {
     title: 'Byward Market',
-    description: '<a href="http://www.byward-market.com/" target="_blank">www.byward-market.com</a>',
+    description: '<a target="_BLANK" href="http://www.byward-market.com/" target="_blank">www.byward-market.com</a>',
     id: "poi2",
     lat: 45.428866,
     lng: -75.691159
   },
   {
-    title: 'Canadian Aviation and Space Museum',
-    description: '<a href="http://www.casmuseum.techno-science.ca/" target="_blank">www.casmuseum.techno-science.ca </a>',
+    title: 'Canada Aviation and Space Museum',
+    description: '<a target="_BLANK" href="http://www.casmuseum.techno-science.ca/" target="_blank">www.casmuseum.techno-science.ca </a>',
     id: "poi3",
     lat: 45.421530,
     lng: -75.697193
   },
   {
     title: 'Rideau Centre',
-    description: '<a href="https://www.cfshops.com/rideau-centre.html" target="_blank">www.cfshops.com/rideau-centre.html</a>',
+    description: '<a target="_BLANK" href="https://www.cfshops.com/rideau-centre.html" target="_blank">www.cfshops.com/rideau-centre.html</a>',
     id: "poi4",
     lat: 45.425098,
     lng: -75.691250
@@ -45,7 +45,8 @@ class PointOfInterest {
     this.title = poi.title;
     this.description = poi.description;
     this.id = poi.id;
-    this.wikilink = poi.wikilink;
+    this.wikilink = ko.observable(poi.wikilink);
+    this.wikisummary = ko.observable(poi.wikisummary);
     this.location = new Location(poi.lat, poi.lng);
   }
 }
@@ -100,12 +101,25 @@ class POIMarker {
   }
   
   onClick() {
+    var that = this;
     window.dispatchEvent(new Event('hideAllInfoWindows'));
     this._marker.setIcon(this.highlightedIcon);
-    this._populateInfoWindow();
     
-    this._map.setZoom(16);
-    this._map.setCenter( this.pointOfInterest.location );
+    console.log("fetching wikipedia things...");
+    $.ajax({
+      url: 'https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(that.pointOfInterest.title),
+      dataType: "jsonp",
+      success: function(response) {
+        console.log(response);
+        that.pointOfInterest.wikisummary(response[2][0]);
+        that.pointOfInterest.wikilink(response[3][0]);
+
+        that._populateInfoWindow();
+        that._map.setZoom(16);
+        that._map.setCenter( that.pointOfInterest.location );
+      }
+    });
+    
   }
   
   hideInfoWindow() { 
@@ -142,12 +156,24 @@ class POIMarker {
   }
   
   _populateInfoWindow(marker) {
+    var that = this;
     var infoWindow = new google.maps.InfoWindow();
     // Check to make sure the infowindow is not already opened on this marker.
     infoWindow.marker = this._marker;
-    infoWindow.setContent('<div>' + this.pointOfInterest.title + '</div>' + '<div>' + this.pointOfInterest.description + '</div>');
+    
+    infoWindow.setContent(
+      '<div>' + this.pointOfInterest.title + '</div>' + 
+      '<div>' + this.pointOfInterest.description + '</div><br/.' +
+      '<div>Wikipedia:</div>' +
+      '<div>' + this.pointOfInterest.wikisummary() + '</div>' +
+      '<div><a target="_BLANK" href="' + this.pointOfInterest.wikilink() + '">Read more on wikipedia</a></div>'
+    );
     infoWindow.open(this._map, this._marker);
     this.infoWindow = infoWindow;
+    
+    google.maps.event.addListener(infoWindow, 'closeclick', function() {
+        that.hideInfoWindow();
+    });
   }
 }
 
@@ -166,20 +192,31 @@ class Application {
   initialize() {
     var that = this;
     this.map = new NeighborhoodMap(this.pointsOfInterest);
-    
     POIlist.forEach(function(poi){
       console.log(poi);
       that.addPointOfInterest(new PointOfInterest(poi));
     });
     
     this.filterPOIs = ko.computed(function () {
+        console.log(that);
         if (!that.currentFilter()) {
+          ko.utils.arrayFilter(that.pointsOfInterest(), function (poi) {
+            console.log(poi);
+            poi.marker.setMap(that.map._map);
+          });
+          
           // Return the full list of POIs
-          return POIlist;
+          return that.pointsOfInterest();
         } else {
           // Return only a list of POIs that match the search term
-          return ko.utils.arrayFilter(POIlist, function (poi) {
-            return poi.title.toLowerCase().indexOf(that.currentFilter()) >= 0;
+          return ko.utils.arrayFilter(that.pointsOfInterest(), function (poi) {
+            if(poi.title.toLowerCase().indexOf(that.currentFilter()) >= 0){
+              poi.marker.setMap(that.map._map);
+              return true;
+            } else {
+              poi.marker.setMap(null);
+              return false;
+            }
           });
         }
     });
@@ -197,31 +234,37 @@ class Application {
         if( poi.id.indexOf(data.id) >= 0 ){
           google.maps.event.trigger(poi.marker, 'click');
         }
+        
       });
     }
     
     ko.applyBindings(this);
     
-    this.fetchWikiLinks();
+//    this.fetchWikiLinks();
     
   }
   
-  fetchWikiLinks(){
-    console.log("fetching wikipedia things...");
-    
-    this.pointsOfInterest().forEach(function(poi, i){
-      $.ajax({
-        url: 'https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(poi.title),
-        dataType: "jsonp",
-        success: function(response) {
-          $(".wikipedia-summary").eq(i).text(response[2][0]);
-//          $(".wikipedia-link").eq(i).html("<a target='_BLANK' href='"+response[3][0]+"'>Click to read more</a>");
-          POIlist[i].wikilink = response[3][0];
-          POIlist[i].wikisummary = response[2][0];
-        }
-      });
-    });
-  }
+//  fetchWikiLinks(){
+//    var that = this;
+//    console.log("fetching wikipedia things...");
+//    
+//    this.pointsOfInterest().forEach(function(poi, i){
+//      $.ajax({
+//        url: 'https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(poi.title),
+//        dataType: "jsonp",
+//        success: function(response) {
+//          console.log(that.pointsOfInterest());
+//          $(".wikipedia-summary").eq(i).text(response[2][0]);
+////          $(".wikipedia-link").eq(i).html("<a target='_BLANK' href='"+response[3][0]+"'>Click to read more</a>");
+//          poi.wikisummary(response[2][0]);
+//          poi.wikilink(response[3][0]);
+//          
+//          POIlist[i].wikilink = response[3][0];
+//          POIlist[i].wikisummary = response[2][0];
+//        }
+//      });
+//    });
+//  }
 }
 
 var app = new Application();
