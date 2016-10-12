@@ -2,8 +2,14 @@
 
 ## Overview
 
-This project is built using HTML, CSS, JavaScript. Additionally, it uses the Google Maps API, jQuery, Knockout JS, to create a map of some of Ottawa's landmarks.
+This project is built using HTML, CSS, JavaScript. Additionally, it uses the Google Maps API, jQuery, Knockout JS, to create a map of
 
-It also has a search bar to navigate through the landmarks and is responsive.
+You can view a live version of the map at 
 
-You can view a live version of the map by downloading the zip file of this project, and then viewing the index.html file in your browser.
+- Make sure it's responsive
+- Google maps that will show markers
+- List view of places shown in markers
+- Search bar to filter the markers
+
+App architecture
+-

@@ -105,15 +105,23 @@ class POIMarker {
     window.dispatchEvent(new Event('hideAllInfoWindows'));
     this._marker.setIcon(this.highlightedIcon);
     
-    console.log("fetching wikipedia things...");
+    console.log("Fetching things from Wikipedia...");
     $.ajax({
       url: 'https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(that.pointOfInterest.title),
       dataType: "jsonp",
       success: function(response) {
-        console.log(response);
         that.pointOfInterest.wikisummary(response[2][0]);
         that.pointOfInterest.wikilink(response[3][0]);
 
+        that._populateInfoWindow();
+        that._map.setZoom(16);
+        that._map.setCenter( that.pointOfInterest.location );
+      },
+      error: function(){
+        that.pointOfInterest.wikisummary("");
+        that.pointOfInterest.wikilink("#");
+        alert("Uh Oh! Couldn't fetch extra info from Wikipedia. If this keeps happening, please contact the author.");
+        
         that._populateInfoWindow();
         that._map.setZoom(16);
         that._map.setCenter( that.pointOfInterest.location );
@@ -161,12 +169,18 @@ class POIMarker {
     // Check to make sure the infowindow is not already opened on this marker.
     infoWindow.marker = this._marker;
     
+    var wikiInfo = "";
+    
+    if(this.pointOfInterest.wikilink() != "#"){
+      wikiInfo = '<div>Wikipedia:</div>' +
+                 '<div>' + this.pointOfInterest.wikisummary() + '</div>' +
+                 '<div><a target="_BLANK" href="' + this.pointOfInterest.wikilink() + '">Read more on wikipedia</a></div>';
+    }
+    
     infoWindow.setContent(
       '<div>' + this.pointOfInterest.title + '</div>' + 
       '<div>' + this.pointOfInterest.description + '</div><br/.' +
-      '<div>Wikipedia:</div>' +
-      '<div>' + this.pointOfInterest.wikisummary() + '</div>' +
-      '<div><a target="_BLANK" href="' + this.pointOfInterest.wikilink() + '">Read more on wikipedia</a></div>'
+      wikiInfo
     );
     infoWindow.open(this._map, this._marker);
     this.infoWindow = infoWindow;
@@ -193,15 +207,12 @@ class Application {
     var that = this;
     this.map = new NeighborhoodMap(this.pointsOfInterest);
     POIlist.forEach(function(poi){
-      console.log(poi);
       that.addPointOfInterest(new PointOfInterest(poi));
     });
     
     this.filterPOIs = ko.computed(function () {
-        console.log(that);
         if (!that.currentFilter()) {
           ko.utils.arrayFilter(that.pointsOfInterest(), function (poi) {
-            console.log(poi);
             poi.marker.setMap(that.map._map);
           });
           
@@ -243,34 +254,20 @@ class Application {
 //    this.fetchWikiLinks();
     
   }
-  
-//  fetchWikiLinks(){
-//    var that = this;
-//    console.log("fetching wikipedia things...");
-//    
-//    this.pointsOfInterest().forEach(function(poi, i){
-//      $.ajax({
-//        url: 'https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(poi.title),
-//        dataType: "jsonp",
-//        success: function(response) {
-//          console.log(that.pointsOfInterest());
-//          $(".wikipedia-summary").eq(i).text(response[2][0]);
-////          $(".wikipedia-link").eq(i).html("<a target='_BLANK' href='"+response[3][0]+"'>Click to read more</a>");
-//          poi.wikisummary(response[2][0]);
-//          poi.wikilink(response[3][0]);
-//          
-//          POIlist[i].wikilink = response[3][0];
-//          POIlist[i].wikisummary = response[2][0];
-//        }
-//      });
-//    });
-//  }
 }
 
+
+
 var app = new Application();
+
 
 $(document).ready(function(){
   $(".toggleList").click(function(){
     $("#list").toggleClass("hideList");
   });
 });
+
+// Google Maps Error Handling Function
+var googleMapsError = function(){
+  alert("Uh Oh! Google Maps failed to load. If this keeps happening, please contact the author.");
+}
